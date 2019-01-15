@@ -1,0 +1,46 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "virtualNetworkName": {
+            "type": "string",
+            "defaultValue": "vNet"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[parameters('virtualNetworkName')]",
+            "apiVersion": "2018-10-01",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "env": "prod",
+                "dept": "it",
+                "costCenter": "administrative"
+            },
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "192.168.0.0/16"
+                    ]
+                }
+            },
+            "subnets": [
+                {
+                    "name": "subnet-192_168_1_0",
+                    "properties": {
+                        "addressPrefixes": "192.168.1.0/24"                        
+                    }
+                },
+
+                {
+                    "name": "subnet-192_168_2_0",
+                    "properties": {
+                        "addressPrefixes": "192.168.2.0/24"                        
+                    }
+                }
+            ]
+        }
+    ]
+}
