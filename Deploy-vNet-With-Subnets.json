@@ -23,14 +23,14 @@
             },
             "subnets": [
                 {
-                    "name": "subnet-192_168_1_0",
+                    "id": "subnet-192_168_1_0",
                     "properties": {
                         "addressPrefixes": "192.168.1.0/24"                        
                     }
                 },
 
                 {
-                    "name": "subnet-192_168_2_0",
+                    "id": "subnet-192_168_2_0",
                     "properties": {
                         "addressPrefixes": "192.168.2.0/24"                        
                     }
