@@ -1,0 +1,279 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+
+    "parameters": {
+        "vmAdminName": {
+            "type": "string",
+            "defaultValue": "jeffadmin"
+        },
+
+        "vmAdminPassword": {
+            "type": "securestring"
+        }
+    },
+
+    "variables": {
+        "vnetName": "vnet-192-168-0-0",
+        "vnetPrefix": "192.168.0.0/16",
+        "subnetName": "subnet0",
+        "subnetPrefix": "192.168.0.0/24",
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('subnetName'))]",
+        "vmSize": "Standard_B1s",
+        "ansibleVmName": "ansiblecontrol",
+        "ansibleNic": "[concat(variables('ansibleVmName'), '-nic')]",
+        "ansiblePIP": "[concat(variables('ansibleVmName'), '-pip')]",
+        "linuxVmName": "linux01",
+        "linuxNic": "[concat(variables('linuxVmName'), '-nic')]",
+        "winVmName": "win01",
+        "winNic": "[concat(variables('winVmName'), '-nic')]",
+        "winOSVersion": "2016-Datacenter",
+        "osDiskType": "Premium_LRS"
+    },
+
+    "resources": [
+        {
+            "name": "[variables('vnetName')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2019-09-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('vnetPrefix')]"
+                    ]
+                },
+
+                "subnets": [
+                    {
+                        "name": "[variables('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('subnetPrefix')]"
+                        }
+                    }
+                ]
+            }
+        },
+
+        {
+            "name": "[variables('ansiblePIP')]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2019-09-01",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "publicIPAddressVersion": "IPv4"
+            }
+        },
+
+        {
+            "name": "[variables('ansibleNic')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2017-09-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('ansiblePIP'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIPAddresses', variables('ansiblePIP'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+
+        {
+            "name": "[variables('linuxNic')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2017-09-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic"
+                        }
+                    }
+                ]
+            }
+        },
+
+        {
+            "name": "[variables('winNic')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2017-09-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic"
+                        }
+                    }
+                ]
+            }
+        },
+
+        {
+            "name": "[variables('ansibleVmName')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-03-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('ansibleNic'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('vmSize')]"
+                },
+
+                "storageProfile": {
+                    "osDisk": {
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "[variables('osDiskType')]"
+                        },
+                        "diskSizeGB": 31
+                    },
+                    "imageReference": {
+                        "publisher": "OpenLogic",
+                        "offer": "CentOS",
+                        "sku": "7.7",
+                        "version": "latest"
+                    }
+                },
+
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('ansibleNic'))]"
+                        }
+                    ]
+                },
+
+                "osProfile": {
+                    "computerName": "[variables('ansibleVmName')]",
+                    "adminUsername": "[parameters('vmAdminName')]",
+                    "adminPassword": "[parameters('vmAdminPassword')]"
+                }
+            }
+        },
+
+        {
+            "name": "[variables('linuxVmName')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-03-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('linuxNic'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('vmSize')]"
+                },
+
+                "storageProfile": {
+                    "osDisk": {
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "[variables('osDiskType')]"
+                        },
+                        "diskSizeGB": 31
+                    },
+                    "imageReference": {
+                        "publisher": "OpenLogic",
+                        "offer": "CentOS",
+                        "sku": "7.7",
+                        "version": "latest"
+                    }
+                },
+
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('linuxNic'))]"
+                        }
+                    ]
+                },
+
+                "osProfile": {
+                    "computerName": "[variables('ansibleVmName')]",
+                    "adminUsername": "[parameters('vmAdminName')]",
+                    "adminPassword": "[parameters('vmAdminPassword')]"
+                }
+            }
+        },
+
+        {
+            "name": "[variables('winVmName')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-03-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('winNic'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('vmSize')]"
+                },
+
+                "storageProfile": {
+                    "osDisk": {
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "[variables('osDiskType')]"
+                        }
+                    },
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "[variables('winOSVersion')]",
+                        "version": "latest"
+                    }
+                },
+
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('winNic'))]"
+                        }
+                    ]
+                },
+
+                "osProfile": {
+                    "computerName": "[variables('ansibleVmName')]",
+                    "adminUsername": "[parameters('vmAdminName')]",
+                    "adminPassword": "[parameters('vmAdminPassword')]"
+                }
+            }
+        }
+    ]
+}
