@@ -6,8 +6,7 @@
             "type": "string"
         },
         "adminUser": {
-            "type": "string",
-            "defaultValue": "JeffAzure"
+            "type": "string"
         },
         "networkInterface": {
             "type": "string",
