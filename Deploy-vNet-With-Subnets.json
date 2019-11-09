@@ -1,8 +1,10 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
-    "parameters": {},
-    "variables": {},
+    "parameters": {
+    },
+    "variables": {
+    },
     "resources": [
         {
             "type": "Microsoft.Network/virtualNetworks",
@@ -19,23 +21,24 @@
                     "addressPrefixes": [
                         "192.168.0.0/16"
                     ]
-                }
-            },
-            "subnets": [
-                {
-                    "id": "subnet-192_168_1_0",
-                    "properties": {
-                        "addressPrefixes": "192.168.1.0/24"                        
-                    }
                 },
 
-                {
-                    "id": "subnet-192_168_2_0",
-                    "properties": {
-                        "addressPrefixes": "192.168.2.0/24"                        
+                "subnets": [
+                    {
+                        "name": "subnet-192_168_1_0",
+                        "properties": {
+                            "addressPrefix": "192.168.1.0/24"
+                        }
+                    },
+
+                    {
+                        "name": "subnet-192_168_2_0",
+                        "properties": {
+                            "addressPrefix": "192.168.2.0/24"
+                        }
                     }
-                }
-            ]
+                ]
+            }
         }
     ]
 }
