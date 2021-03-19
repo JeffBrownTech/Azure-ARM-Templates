@@ -9,13 +9,16 @@
         "location": {
             "type": "string",
             "defaultValue": "westus2"
+        },
+
+        "addressPrefix": {
+            "type": "string"
         }
     },
     "functions": [],
     "variables": {
         "storage-template": "https://raw.githubusercontent.com/JeffBrownTech/Azure-ARM-Templates/master/linked-templates/templates/storage.json",
-        "vnet-template": "https://raw.githubusercontent.com/JeffBrownTech/Azure-ARM-Templates/master/linked-templates/templates/vnet.json",
-        "addressPrefix": "10.50.0.0/16"
+        "vnet-template": "https://raw.githubusercontent.com/JeffBrownTech/Azure-ARM-Templates/master/linked-templates/templates/vnet.json"
     },
     "resources": [
         {
@@ -48,7 +51,7 @@
                 "parameters": {
                     "name": {"value": "[parameters('name')]"},
                     "location": {"value": "[parameters('location')]"},
-                    "addressPrefix": {"value": "[variables('addressPrefix')]"}
+                    "addressPrefix": {"value": "[parameters('addressPrefix')]"}
                 }
             }
         }
