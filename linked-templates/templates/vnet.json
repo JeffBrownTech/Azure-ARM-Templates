@@ -16,7 +16,7 @@
     },
     "resources": [
         {
-            "name": "[parameters('name')]",
+            "name": "[concat('vnet-', parameters('name'), '-', parameters('location'))]",
             "type": "Microsoft.Network/virtualNetworks",
             "apiVersion": "2019-11-01",
             "location": "[parameters('location')]",
