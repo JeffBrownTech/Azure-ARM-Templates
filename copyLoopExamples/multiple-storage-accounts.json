@@ -1,0 +1,36 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "copyCount": {
+            "type": "int",
+            "metadata": {
+                "description": "Number of storage accounts to provision."
+            }
+        },
+        "copyStart": {
+            "type": "int",
+            "metadata": {
+                "description": "Index to start copy at."
+            },
+            "defaultValue": 0
+        }
+    },
+    "resources": [
+        {
+            "name": "[concat('sajbtcopydemo', copyIndex(parameters('copyStart')))]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-06-01",
+            "location": "[resourceGroup().location]",
+            "kind": "StorageV2",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "copy": {
+                "name": "saCopy",
+                "count": "[parameters('copyCount')]"
+            }
+        }
+    ]
+}
